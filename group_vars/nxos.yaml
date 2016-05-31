@@ -4,6 +4,9 @@ cli:
   username: "{{ nxos_cli_user | default('admin') }}"
   password: "{{ nxos_cli_pass | default('admin') }}"
   transport: cli
+  7.0.3.I4: "nxos.7.0.3.I4.1.bin"
+  7.0.3.I2: "nxos.7.0.3.I2.1.bin"
+  platform: cisco_nxos_nxapi
 
 nxapi:
   host: "{{ inventory_hostname }}"
@@ -11,5 +14,9 @@ nxapi:
   password: "{{ nxos_nxapi_pass | default('admin') }}"
   transport: nxapi
   use_ssl: no
+  I4: nxos.7.0.3.I4.1.bin
+  I2: nxos.7.0.3.I2.1.bin
+  platform: cisco_nxos_nxapi
+
 
 

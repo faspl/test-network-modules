@@ -10,6 +10,7 @@
     - { role: test_nxos_command, when: "limit_to in ['*', 'nxos_command']" }
     - { role: test_nxos_config, when: "limit_to in ['*', 'nxos_config']" }
     - { role: test_nxos_template, when: "limit_to in ['*', 'nxos_template']" }
+    - { role: test_nxos_module, when: "limit_to in ['*', 'nxos_module']" }
     #- { role: test_nxos_nxapi, when: "limit_to in ['*', 'nxos_nxapi']" }
 
 

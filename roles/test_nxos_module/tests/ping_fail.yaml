@@ -1,0 +1,28 @@
+---
+- debug: msg="START nxapi/ping_fail.yaml"
+
+- name: ensure ping fails
+  nxos_ping: 
+    dest=8.8.8.88
+    vrf=management
+    host={{ inventory_hostname }}
+    state=absent
+    username={{ username }}
+    password={{ password }}
+    transport={{ item }}
+  with_items:
+    - nxapi
+    - cli
+  register: data
+
+- assert:
+    that: 
+      - data.results[{{ item.0 }}].packet_loss
+      - data.results[{{ item.0 }}].packets_rx
+      - data.results[{{ item.0 }}].packets_tx
+      - data.results[{{ item.0 }}].action
+      - data.results[{{ item.0 }}].updates
+      - data.results[{{ item.0 }}].dest
+      - data.results[{{ item.0 }}].count
+      - data.results[{{ item.0 }}].rtt
+  with_indexed_items: data.results

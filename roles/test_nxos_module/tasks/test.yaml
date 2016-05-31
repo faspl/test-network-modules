@@ -1,0 +1,55 @@
+---
+- name: collect all test cases
+  find:
+    paths: "{{ role_path }}/tests/"
+    patterns: "{{ testcase }}.yaml"
+  register: test_cases
+
+- name: set test_items
+  set_fact: test_items="{{ test_cases.files | map(attribute='path') | list }}"
+
+- name: enable nxapi
+  nxos_config:
+    lines:
+      - feature nxapi
+      - nxapi http port 80
+    provider: "{{ cli }}"
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+
+- name: run test case
+  include: "{{ item }}"
+  with_items: "{{ test_items }}"
+
+- name: upgrade to 7.0.3.I4
+  ntc_install_os:
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    platform: "{{ nxapi.platform }}"
+    system_image_file: "{{ nxapi.I4 }}"
+  when: inventory_hostname != "n3k2"
+
+- name: run test case
+  include: "{{ item }}"
+  with_items: "{{ test_items }}"
+
+- name: downgrade to 7.0.3.I2
+  ntc_install_os:
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    platform: "{{ nxapi.platform }}"
+    system_image_file: "{{ nxapi.I2 }}"
+  when: inventory_hostname != "n3k2"
+
+- name: disable nxapi
+  nxos_config:
+    lines:
+      - no feature nxapi
+    provider: "{{ cli }}"
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+
