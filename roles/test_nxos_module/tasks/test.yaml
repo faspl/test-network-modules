@@ -1,12 +1,21 @@
 ---
-- name: collect all test cases
+- name: collect all cli test cases
   find:
-    paths: "{{ role_path }}/tests/"
+    paths: "{{ role_path }}/tests/cli"
     patterns: "{{ testcase }}.yaml"
-  register: test_cases
+  register: cli_test_cases
 
-- name: set test_items
-  set_fact: test_items="{{ test_cases.files | map(attribute='path') | list }}"
+- name: collect all nxapi test cases
+  find:
+    paths: "{{ role_path }}/tests/nxapi"
+    patterns: "{{ testcase }}.yaml"
+  register: nxapi_test_cases
+
+- name: set cli_test_items
+  set_fact: cli_test_items="{{ cli_test_cases.files | map(attribute='path') | list }}"
+
+- name: set nxapi_test_items
+  set_fact: nxapi_test_items="{{ nxapi_test_cases.files | map(attribute='path') | list }}"
 
 - name: enable nxapi
   nxos_config:
@@ -18,38 +27,48 @@
     username: "{{ username }}"
     password: "{{ password }}"
 
-- name: run test case
+- name: run cli test case
   include: "{{ item }}"
-  with_items: "{{ test_items }}"
+  with_items: "{{ cli_test_items }}"
+
+- name: run nxapi test case
+  include: "{{ item }}"
+  with_items: "{{ nxapi_test_items }}"
 
 - name: upgrade to 7.0.3.I4
   ntc_install_os:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-    platform: "{{ nxapi.platform }}"
-    system_image_file: "{{ nxapi.I4 }}"
-  when: inventory_hostname != "n3k2"
+    platform: "{{ upgrade.platform }}"
+    system_image_file: "{{ upgrade.I4 }}"
+  when: (upgrade.os_upgrade == "yes") and (inventory_hostname != "n3k2")
 
-- name: run test case
+- name: re-run cli test case
   include: "{{ item }}"
-  with_items: "{{ test_items }}"
+  with_items: "{{ cli_test_items }}"
+  when: upgrade.os_upgrade == "yes"
+
+- name: re-run nxapi test case
+  include: "{{ item }}"
+  with_items: "{{ nxapi_test_items }}"
+  when: upgrade.os_upgrade == "yes"
 
 - name: downgrade to 7.0.3.I2
   ntc_install_os:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-    platform: "{{ nxapi.platform }}"
-    system_image_file: "{{ nxapi.I2 }}"
-  when: inventory_hostname != "n3k2"
+    platform: "{{ upgrade.platform }}"
+    system_image_file: "{{ upgrade.I2 }}"
+  when: (upgrade.os_upgrade == "yes") and (inventory_hostname != "n3k2")
 
-- name: disable nxapi
-  nxos_config:
-    lines:
-      - no feature nxapi
-    provider: "{{ cli }}"
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
+#- name: disable nxapi
+#  nxos_config:
+#    lines:
+#      - no feature nxapi
+#    provider: "{{ cli }}"
+#    host: "{{ inventory_hostname }}"
+#    username: "{{ username }}"
+#    password: "{{ password }}"
 

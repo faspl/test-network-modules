@@ -1,0 +1,26 @@
+---
+- debug: msg="START cli/ping_fail.yaml"
+
+- name: ensure ping fails
+  nxos_ping: 
+    dest=8.8.8.88
+    vrf=management
+    host={{ inventory_hostname }}
+    state=absent
+    username={{ username }}
+    password={{ password }}
+    transport=cli
+  register: data
+
+- debug: var=data
+
+- assert:
+    that: 
+      - data.packet_loss
+      - data.packets_rx
+      - data.packets_tx
+      - data.action
+      - data.updates
+      - data.dest
+      - data.count
+      - data.rtt
