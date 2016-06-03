@@ -27,6 +27,14 @@
     username: "{{ username }}"
     password: "{{ password }}"
 
+- name: set checkpoint configuration file
+  ntc_rollback:
+    host: "{{ inventory_hostname }}"
+    username: "{{ username }}"
+    password: "{{ password }}"
+    platform: cisco_nxos_nxapi
+    checkpoint_file: ansible_test.cfg
+
 - name: run cli test case
   include: "{{ item }}"
   with_items: "{{ cli_test_items }}"
@@ -35,33 +43,13 @@
   include: "{{ item }}"
   with_items: "{{ nxapi_test_items }}"
 
-- name: upgrade to 7.0.3.I4
-  ntc_install_os:
+- name: rollback to checkpoint configuration file
+  ntc_rollback:
     host: "{{ inventory_hostname }}"
     username: "{{ username }}"
     password: "{{ password }}"
-    platform: "{{ upgrade.platform }}"
-    system_image_file: "{{ upgrade.I4 }}"
-  when: (upgrade.os_upgrade == "yes") and (inventory_hostname != "n3k2")
-
-- name: re-run cli test case
-  include: "{{ item }}"
-  with_items: "{{ cli_test_items }}"
-  when: upgrade.os_upgrade == "yes"
-
-- name: re-run nxapi test case
-  include: "{{ item }}"
-  with_items: "{{ nxapi_test_items }}"
-  when: upgrade.os_upgrade == "yes"
-
-- name: downgrade to 7.0.3.I2
-  ntc_install_os:
-    host: "{{ inventory_hostname }}"
-    username: "{{ username }}"
-    password: "{{ password }}"
-    platform: "{{ upgrade.platform }}"
-    system_image_file: "{{ upgrade.I2 }}"
-  when: (upgrade.os_upgrade == "yes") and (inventory_hostname != "n3k2")
+    platform: cisco_nxos_nxapi
+    rollback_to: ansible_test.cfg
 
 #- name: disable nxapi
 #  nxos_config:

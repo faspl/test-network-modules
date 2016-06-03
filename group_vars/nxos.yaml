@@ -12,11 +12,12 @@ nxapi:
   transport: nxapi
   use_ssl: no
 
-upgrade:
-  os_upgrade: no
-  7.0.3.I4: "nxos.7.0.3.I4.1.bin"
-  7.0.3.I2: "nxos.7.0.3.I2.1.bin"
-  platform: cisco_nxos_nxapi
+upgrade: yes
+
+images:
+  nxos:
+    - nxos.7.0.3.I2.2d.bin
+    - nxos.7.0.3.I4.1.bin
 
 
 
