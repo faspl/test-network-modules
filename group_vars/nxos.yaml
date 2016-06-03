@@ -15,6 +15,8 @@ nxapi:
 upgrade: yes
 
 images:
+  base_image: nxos.7.0.3.I2.2d.bin
+
   nxos:
     - nxos.7.0.3.I2.2d.bin
     - nxos.7.0.3.I4.1.bin
