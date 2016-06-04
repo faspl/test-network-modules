@@ -1,0 +1,59 @@
+---
+- debug: msg="START cli/portchannel_add_member.yaml"
+
+- name: prepare the device
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    mode: 'active'
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- name: adding a member to an existing port-channel
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7', 'Ethernet1/8']
+    mode: 'active'
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - "'Ethernet1/8' in data.end_state.get('members')"
+
+- name: idempotency check
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7', 'Ethernet1/8']
+    mode: 'active'
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7', 'Ethernet1/8']
+    mode: 'active'
+    host: "{{ inventory_hostname }}"
+    state: absent
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data

@@ -1,0 +1,51 @@
+---
+- debug: msg="START cli/portchannel_min_links.yaml"
+
+- name: ensure portchanel is configured with mode proper min-links
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    mode: 'active'
+    min_links: '2'
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['min_links'] == '2'
+
+- name: idempotency check
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    mode: 'active'
+    min_links: '2'
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+      - data.end_state['min_links'] == '2'
+
+- name: restore initial state
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    mode: 'active'
+    min_links: '2'
+    host: "{{ inventory_hostname }}"
+    state: absent
+    transport: cli
+    username: admin
+    password: "!cisco123!"
+  register: data

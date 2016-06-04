@@ -1,0 +1,86 @@
+---
+- debug: msg="START nxapi/portchannel_multiple.yaml"
+
+- name: create first port-channel
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['group'] == '11'
+
+- name: idempotency check
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: create second port-channel
+  nxos_portchannel:
+    group: 12
+    members: ['Ethernet1/8','Ethernet1/9']
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['group'] == '12'
+
+- name: idempotency check
+  nxos_portchannel:
+    group: 12
+    members: ['Ethernet1/8','Ethernet1/9']
+    host: "{{ inventory_hostname }}"
+    state: present
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: remove first port-channel
+  nxos_portchannel:
+    group: 11
+    members: ['Ethernet1/6','Ethernet1/7']
+    host: "{{ inventory_hostname }}"
+    state: absent
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
+
+- name: remove second port-channel
+  nxos_portchannel:
+    group: 12
+    members: ['Ethernet1/8','Ethernet1/9']
+    host: "{{ inventory_hostname }}"
+    state: absent
+    transport: nxapi
+    username: admin
+    password: "!cisco123!"
+  register: data
