@@ -1,0 +1,78 @@
+---
+- debug: msg="START cli/vpc_change_dst.yaml"
+
+- name: prepare the device
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.2
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+
+- name: change peer-keepalive destination
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.1
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['pkl_dest'] == '192.168.100.1'
+
+- name: idempotency check
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.1
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.1
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=absent
+    transport=cli
+    username=admin
+    password=!cisco123!

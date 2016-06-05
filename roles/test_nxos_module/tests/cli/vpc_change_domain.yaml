@@ -1,0 +1,71 @@
+---
+- debug: msg="START cli/vpc_change_domain.yaml"
+
+- name: prepare the device
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['domain'] == '10'
+
+- name: change vpc domain to 100
+  nxos_vpc:
+    domain=100
+    role_priority=1000
+    system_priority=2000
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['domain'] == '100'
+
+- name: idempotency check
+  nxos_vpc:
+    domain=100
+    role_priority=1000
+    system_priority=2000
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc:
+    domain=100
+    role_priority=1000
+    system_priority=2000
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=absent
+    transport=cli
+    username=admin
+    password=!cisco123!

@@ -1,0 +1,64 @@
+---
+- debug: msg="START nxapi/vpc_create.yaml"
+
+- name: ensure vpc domain 10 is present on the device
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.2
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['domain'] == '10'
+      - data.end_state['role_priority'] == '1000'
+      - data.end_state['system_priority'] == '2000'
+      - data.end_state['pkl_dest'] == '192.168.100.2'
+      - data.end_state['pkl_src'] == '10.1.100.20'
+      - data.end_state['peer_gw'] == true
+      - data.end_state['auto_recovery'] == true
+
+- name: idempotency check
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.2
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    pkl_dest=192.168.100.2
+    pkl_src=10.1.100.20
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=absent
+    transport=nxapi
+    username=admin
+    password=!cisco123!

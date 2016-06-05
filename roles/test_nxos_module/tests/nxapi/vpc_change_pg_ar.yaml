@@ -1,0 +1,72 @@
+---
+- debug: msg="START nxapi/vpc_change_pg_ar.yaml"
+
+- name: prepare the device
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    peer_gw=true
+    auto_recovery=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['peer_gw'] == true
+
+- name: change peer_gw and auto_recovery to false
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    peer_gw=false
+    auto_recovery=false
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['peer_gw'] == false
+      - data.end_state['auto_recovery'] == false
+
+- name: idempotency check
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    peer_gw=false
+    auto_recovery=false
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc:
+    domain=10
+    role_priority=1000
+    system_priority=2000
+    peer_gw=false
+    auto_recovery=false
+    host={{ inventory_hostname }}
+    state=absent
+    transport=nxapi
+    username=admin
+    password=!cisco123!
