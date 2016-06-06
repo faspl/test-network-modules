@@ -1,0 +1,44 @@
+---
+- debug: msg="START cli/vpc_interface_fail_existing_pc.yaml"
+
+- name: prepare the device
+  nxos_vpc_interface:
+    portchannel=100
+    vpc=10
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.end_state['vpc'] == '10'
+
+- name: ensure it fails due to vpc already existing on a different portchannel interface
+  nxos_vpc_interface:
+    portchannel=101
+    vpc=10
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+  ignore_errors: true
+
+- assert:
+    that:
+      - data | failed
+
+- name: restore initial state
+  nxos_vpc_interface:
+    portchannel=100
+    vpc=10
+    host={{ inventory_hostname }}
+    state=absent
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data

@@ -1,0 +1,44 @@
+---
+- debug: msg="START nxapi/vpc_interface_assign_vpc.yaml"
+
+- name: configure portchannel 100 to be vpc 10
+  nxos_vpc_interface:
+    portchannel=100
+    vpc=10
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['vpc'] == '10'
+
+- name: idempotency check
+  nxos_vpc_interface:
+    portchannel=100
+    vpc=10
+    host={{ inventory_hostname }}
+    state=present
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc_interface:
+    portchannel=100
+    vpc=10
+    host={{ inventory_hostname }}
+    state=absent
+    transport=nxapi
+    username=admin
+    password=!cisco123!
+  register: data

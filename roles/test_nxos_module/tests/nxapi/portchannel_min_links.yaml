@@ -1,7 +1,7 @@
 ---
 - debug: msg="START nxapi/portchannel_min_links.yaml"
 
-- name: ensure portchanel is configured with mode proper min-links
+- name: ensure portchanel is configured with proper min-links
   nxos_portchannel:
     group: 11
     members: ['Ethernet1/6','Ethernet1/7']
@@ -31,6 +31,8 @@
     username: admin
     password: "!cisco123!"
   register: data
+
+- debug: var=data
 
 - assert:
     that:

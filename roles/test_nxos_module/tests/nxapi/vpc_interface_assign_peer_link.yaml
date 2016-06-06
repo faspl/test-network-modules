@@ -1,0 +1,44 @@
+---
+- debug: msg="START cli/vpc_interface_assign_peer_link.yaml"
+
+- name: configure portchannel 100 to be the peer-link
+  nxos_vpc_interface:
+    portchannel=100
+    peer_link=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == true
+      - data.end_state['peer-link'] == true
+
+- name: idempotency check
+  nxos_vpc_interface:
+    portchannel=100
+    peer_link=true
+    host={{ inventory_hostname }}
+    state=present
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
+
+- assert:
+    that:
+      - data.changed == false
+
+- name: restore initial state
+  nxos_vpc_interface:
+    portchannel=100
+    peer_link=true
+    host={{ inventory_hostname }}
+    state=absent
+    transport=cli
+    username=admin
+    password=!cisco123!
+  register: data
